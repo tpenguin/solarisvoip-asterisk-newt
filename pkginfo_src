@@ -5,6 +5,7 @@ ARCH=<arch>
 CATEGORY=system
 VENDOR=SolarisVoip.com
 EMAIL=joe@thrallingpenguin.com
+SUNW_PKGTYPE=usr
 BASEDIR=/
 CLASSES=none
 MAXINST=9999
