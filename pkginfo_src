@@ -1,0 +1,10 @@
+PKG=SVnewt
+NAME=libnewt
+VERSION=0.51.0
+ARCH=<arch>
+CATEGORY=system
+VENDOR=SolarisVoip.com
+EMAIL=joe@thrallingpenguin.com
+BASEDIR=/
+CLASSES=none
+MAXINST=9999

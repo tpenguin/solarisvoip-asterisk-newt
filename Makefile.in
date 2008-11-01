@@ -1,3 +1,4 @@
+CC = @CC@
 LIBS = -lslang -lm #-lefence
 SHLIBS = -lslang -lm -lc
 
@@ -49,31 +50,31 @@ else
 TARGET=depend $(PROGS)
 endif
 
-all:	$(TARGET) _snackmodule.so
+all:	$(TARGET) _snackmodule.so pkg
 
 test:	$(TESTOBJS) $(LIBNEWT)
-	gcc -g -o test $(TESTOBJS) $(LIBNEWT) $(LIBS) -static
+	$(CC) -g -o test $(TESTOBJS) $(LIBNEWT) $(LIBS) 
 
 testgrid:	testgrid.o $(LIBNEWT)
-	gcc -g -o testgrid testgrid.o $(LIBNEWT) $(LIBS)
+	$(CC) -g -o testgrid testgrid.o $(LIBNEWT) $(LIBS)
 
 testtree:	testtree.o $(LIBNEWT)
-	gcc -g -o testtree testtree.o $(LIBNEWT) $(LIBS)
+	$(CC) -g -o testtree testtree.o $(LIBNEWT) $(LIBS)
 
 _snackmodule.so:   snackmodule.c $(LIBNEWTSH)
 	for ver in $(PYTHONVERS) ; do \
 	    if [ ! -f "$$ver/_snackmodule.so" -o $(LIBNEWTSH) -nt "$$ver/_snackmodule.so" ]; then \
 	    	mkdir -p $$ver ;\
-	        gcc $(CFLAGS) -I/usr/include/$$ver -fPIC -c -o $$ver/snackmodule.o snackmodule.c ;\
-		gcc --shared $(SHCFLAGS) -o $$ver/_snackmodule.so $$ver/snackmodule.o -L . $(LIBNEWTSH) ;\
+	        $(CC) $(CFLAGS) -I/usr/include/$$ver -fPIC -c -o $$ver/snackmodule.o snackmodule.c ;\
+		$(CC) --shared $(SHCFLAGS) -o $$ver/_snackmodule.so $$ver/snackmodule.o -L . $(LIBNEWTSH) ;\
 	    fi ; \
 	done
 
 whiptail: $(NDIALOGOBJS) $(LIBNEWTSH)
-	gcc -g -o whiptail $(NDIALOGOBJS) -L . $(LIBNEWTSH) $(LIBS) -lpopt
+	$(CC) -g -o whiptail $(NDIALOGOBJS) -L . $(LIBNEWTSH) $(LIBS) -lpopt
 
 whiptcl.so: $(WHIPTCLOBJS) $(LIBNEWTSH)
-	gcc -shared $(SHCFLAGS) -o whiptcl.so $(WHIPTCLOBJS) -L . $(LIBNEWTSH) -ltcl -lslang -lpopt -lm
+	$(CC) -shared $(SHCFLAGS) -o whiptcl.so $(WHIPTCLOBJS) -L . $(LIBNEWTSH) -ltcl -lslang -lpopt -lm
 
 $(LIBNEWT): $(LIBNEWT)($(LIBOBJS))
 
@@ -84,7 +85,7 @@ veryclean: clean
 	rm -f .depend
 
 clean:
-	rm -f $(PROGS) *.o $(LIBNEWT) core $(LIBNEWTSH)  \
+	rm -f $(PROGS) pkginfo *.o $(LIBNEWT) core $(LIBNEWTSH)  \
 		$(SHAREDOBJS) *.so*
 
 depend:
@@ -96,7 +97,7 @@ $(SHAREDDIR):
 sharedlib: $(LIBNEWTSH)
 
 $(LIBNEWTSH): $(SHAREDDIR) $(SHAREDOBJS)
-	gcc -shared -o $(LIBNEWTSH) -Wl,-soname,$(LIBNEWTSONAME) $(SHAREDOBJS) $(SHLIBS)
+	$(CC) -shared -o $(LIBNEWTSH) -Wl,-soname,$(LIBNEWTSONAME) $(SHAREDOBJS) $(SHLIBS)
 
 $(SHAREDDIR)/%.o : %.c
 	$(CC) $(SHCFLAGS) -c $(CFLAGS) -o $@ $<
@@ -140,6 +141,19 @@ archive:    configure
 	@rm -f /tmp/newt-$(VERSION).tar.gz
 	@echo " "
 	@echo "The final archive is ./newt-$(VERSION).tar.gz."
+
+PKGMK		= pkgmk -o
+PKGTRANS	= pkgtrans
+ARCH		= $(shell pkgparam SUNWcsr ARCH)
+PKGNAME		= SVnewt
+PKGARCHIVE	= $(shell pwd)/$(shell uname -s)-$(shell uname -r).$(shell uname -m)
+PKGARCH		= $(shell uname -m)-$(shell uname -r)
+pkg:	$(TARGET) sharedlib whiptail
+	sed -e 's|<arch>|$(ARCH)|' pkginfo_src > pkginfo
+	[ ! -d $(PKGARCHIVE) ] || rm -rf $(PKGARCHIVE)
+	mkdir -p $(PKGARCHIVE)
+	$(PKGMK) -a $(ARCH) -d $(PKGARCHIVE) -f prototype VERSION=$(VERSION)
+	$(PKGTRANS) -s $(PKGARCHIVE) $(PKGNAME)-$(VERSION)-$(PKGARCH).pkg $(PKGNAME)
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

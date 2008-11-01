@@ -1,0 +1,12 @@
+i pkginfo
+i depend
+d none usr ? ? ?
+d none usr/lib ? ? ?
+d none usr/bin ? ? ?
+d none usr/include ? ? ?
+f none usr/lib/libnewt.so.0.51.0=libnewt.so.0.51.0 0755 root root
+s none usr/lib/libnewt.so.0=libnewt.so.0.51.0
+s none usr/lib/libnewt.so=libnewt.so.0.51.0
+f none usr/include/newt.h=newt.h 0644 root root
+f none usr/bin/whiptail=whiptail 0755 root root
+
